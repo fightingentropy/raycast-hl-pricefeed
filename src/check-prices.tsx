@@ -54,13 +54,11 @@ export default function CheckPrices() {
         symbol,
         price,
         formattedPrice: formatPrice(price),
-        isHype: symbol.toLowerCase().includes("hype"),
-        isBtc: symbol.toLowerCase().includes("btc") || symbol === "BTC",
+        isHype: symbol === "HYPE",
+        isBtc: symbol === "BTC",
       }))
+      .filter((item) => item.isBtc || item.isHype)
       .sort((a, b) => {
-        // Prioritize HYPE and BTC at the top
-        if (a.isHype && !b.isHype) return -1;
-        if (!a.isHype && b.isHype) return 1;
         if (a.isBtc && !b.isBtc) return -1;
         if (!a.isBtc && b.isBtc) return 1;
         return a.symbol.localeCompare(b.symbol);
@@ -148,7 +146,11 @@ export default function CheckPrices() {
             }}
             accessories={[
               {
-                text: item.isBtc ? "PERP" : item.isHype ? "HYPE-PERP" : "",
+                text: item.isBtc
+                  ? "BTC-PERP"
+                  : item.isHype
+                    ? "HYPE-PERP"
+                    : "",
                 tooltip: item.isBtc
                   ? "Bitcoin Perpetual"
                   : item.isHype
