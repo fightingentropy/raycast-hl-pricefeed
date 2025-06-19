@@ -13,7 +13,8 @@
       "title": "HYPE & BTC Price",
       "description": "Fetch Hyperliquid mids",
       "mode": "view",
-      "entrypoint": "src/check-prices.tsx"
+      "entrypoint": "src/check-prices.tsx",
+      "disableChildrenOnLoad": true
     }
   ],
   "scripts": {
