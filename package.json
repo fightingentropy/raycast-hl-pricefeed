@@ -3,6 +3,7 @@
   "title": "Hyperliquid Prices",
   "displayName": "Hyperliquid Prices",
   "description": "Check HYPE and BTC prices from Hyperliquid API",
+  "icon": "assets/command-icon.png",
   "version": "1.0.0",
   "author": "erlin",
   "license": "MIT",
