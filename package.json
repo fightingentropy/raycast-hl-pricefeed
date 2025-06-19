@@ -1,5 +1,6 @@
 {
   "name": "hyperliquid-prices",
+  "title": "Hyperliquid Prices",
   "displayName": "Hyperliquid Prices",
   "description": "Check HYPE and BTC prices from Hyperliquid API",
   "version": "1.0.0",
