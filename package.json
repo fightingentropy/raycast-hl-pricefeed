@@ -3,14 +3,13 @@
   "title": "Hyperliquid Prices",
   "displayName": "Hyperliquid Prices",
   "description": "Check HYPE and BTC prices from Hyperliquid API",
-  "icon": "assets/icon.png",
   "version": "1.0.0",
-  "author": "erlinhoxha",
+  "author": "erlin",
   "license": "MIT",
   "commands": [
     {
       "name": "check-prices",
-      "title": "HYPE & BTC Price",
+      "title": "Hype & Btc Price",
       "description": "Fetch Hyperliquid mids",
       "mode": "view",
       "entrypoint": "src/check-prices.tsx",

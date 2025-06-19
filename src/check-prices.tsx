@@ -146,11 +146,7 @@ export default function CheckPrices() {
             }}
             accessories={[
               {
-                text: item.isBtc
-                  ? "BTC-PERP"
-                  : item.isHype
-                    ? "HYPE-PERP"
-                    : "",
+                text: item.isBtc ? "BTC-PERP" : item.isHype ? "HYPE-PERP" : "",
                 tooltip: item.isBtc
                   ? "Bitcoin Perpetual"
                   : item.isHype
