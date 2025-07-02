@@ -21,6 +21,7 @@ interface PriceItem {
   formattedPrice: string;
   isHype: boolean;
   isBtc: boolean;
+  isSol: boolean;
 }
 
 export default function CheckPrices() {
@@ -56,8 +57,9 @@ export default function CheckPrices() {
         formattedPrice: formatPrice(price),
         isHype: symbol === "HYPE",
         isBtc: symbol === "BTC",
+        isSol: symbol === "SOL",
       }))
-      .filter((item) => item.isBtc || item.isHype)
+      .filter((item) => item.isBtc || item.isHype || item.isSol)
       .sort((a, b) => {
         if (a.isBtc && !b.isBtc) return -1;
         if (!a.isBtc && b.isBtc) return 1;
@@ -68,7 +70,7 @@ export default function CheckPrices() {
   const filteredItems = useMemo(() => {
     if (!searchText) {
       // Show HYPE and BTC by default when no search
-      return priceItems.filter((item) => item.isHype || item.isBtc);
+      return priceItems.filter((item) => item.isHype || item.isBtc || item.isSol);
     }
 
     return priceItems.filter((item) =>
@@ -101,6 +103,8 @@ export default function CheckPrices() {
       return Icon.Rocket;
     } else if (symbol.toLowerCase().includes("btc") || symbol === "BTC") {
       return Icon.Coins;
+    } else if (symbol === "SOL") {
+      return Icon.Sun;
     }
     return Icon.Circle;
   }
@@ -110,6 +114,8 @@ export default function CheckPrices() {
       return Color.Orange;
     } else if (symbol.toLowerCase().includes("btc") || symbol === "BTC") {
       return Color.Yellow;
+    } else if (symbol === "SOL") {
+      return Color.Green;
     }
     return Color.SecondaryText;
   }
@@ -146,12 +152,14 @@ export default function CheckPrices() {
             }}
             accessories={[
               {
-                text: item.isBtc ? "BTC-PERP" : item.isHype ? "HYPE-PERP" : "",
+                text: item.isBtc ? "BTC-PERP" : item.isHype ? "HYPE-PERP" : item.isSol ? "SOL-PERP" : "",
                 tooltip: item.isBtc
                   ? "Bitcoin Perpetual"
                   : item.isHype
                     ? "Hyperliquid Perpetual"
-                    : "",
+                    : item.isSol
+                      ? "Solana Perpetual"
+                      : "",
               },
             ]}
             actions={
