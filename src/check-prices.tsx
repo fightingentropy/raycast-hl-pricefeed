@@ -61,8 +61,11 @@ export default function CheckPrices() {
       }))
       .filter((item) => item.isBtc || item.isHype || item.isSol)
       .sort((a, b) => {
+        // Order: BTC, SOL, HYPE
         if (a.isBtc && !b.isBtc) return -1;
         if (!a.isBtc && b.isBtc) return 1;
+        if (a.isSol && b.isHype) return -1;
+        if (a.isHype && b.isSol) return 1;
         return a.symbol.localeCompare(b.symbol);
       });
   }, [data]);

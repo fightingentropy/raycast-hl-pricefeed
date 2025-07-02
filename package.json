@@ -2,7 +2,7 @@
   "name": "hyperliquid-prices",
   "title": "Hyperliquid Prices",
   "displayName": "Hyperliquid Prices",
-  "description": "Check HYPE and BTC prices from Hyperliquid API",
+  "description": "Check HYPE, BTC, and SOL prices from Hyperliquid API",
   "icon": "assets/command-icon.png",
   "version": "1.0.0",
   "author": "erlin",
@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "check-prices",
-      "title": "Hype & Btc Price",
+      "title": "Hype, Btc & Sol Price",
       "description": "Fetch Hyperliquid mids",
       "mode": "view",
       "entrypoint": "src/check-prices.tsx",
