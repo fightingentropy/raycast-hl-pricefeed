@@ -11,14 +11,37 @@ import { useFetch } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import React from "react";
 
-interface HyperliquidPricesResponse {
-  [key: string]: string;
+interface AssetContext {
+  markPx: string;
+  prevDayPx: string;
+  dayNtlVlm: string;
+  funding: string;
+  openInterest: string;
+  midPx: string;
+  impactPxs: string[];
+  oraclePx: string;
+  premium: string;
+}
+
+interface AssetInfo {
+  name: string;
+  szDecimals: number;
+  maxLeverage: number;
+  onlyIsolated?: boolean;
+  isDelisted?: boolean;
+}
+
+interface HyperliquidMetaAndAssetCtxsResponse {
+  universe: AssetInfo[];
+  assetCtxs: AssetContext[];
 }
 
 interface PriceItem {
   symbol: string;
   price: string;
   formattedPrice: string;
+  priceChange24h: number;
+  priceChangePercentage24h: string;
   isHype: boolean;
   isBtc: boolean;
   isSol: boolean;
@@ -27,7 +50,7 @@ interface PriceItem {
 export default function CheckPrices() {
   const [searchText, setSearchText] = useState("");
 
-  const { data, isLoading, error } = useFetch<HyperliquidPricesResponse>(
+  const { data, isLoading, error } = useFetch<[{ universe: AssetInfo[] }, AssetContext[]]>(
     "https://api.hyperliquid.xyz/info",
     {
       method: "POST",
@@ -35,7 +58,7 @@ export default function CheckPrices() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        type: "allMids",
+        type: "metaAndAssetCtxs",
       }),
       onError: (error: Error) => {
         showToast({
@@ -48,17 +71,33 @@ export default function CheckPrices() {
   );
 
   const priceItems: PriceItem[] = useMemo(() => {
-    if (!data) return [];
+    if (!data || !data[0] || !data[1]) return [];
 
-    return Object.entries(data)
-      .map(([symbol, price]) => ({
-        symbol,
-        price,
-        formattedPrice: formatPrice(price),
-        isHype: symbol === "HYPE",
-        isBtc: symbol === "BTC",
-        isSol: symbol === "SOL",
-      }))
+    const { universe } = data[0];
+    const assetCtxs = data[1];
+
+    return universe
+      .map((asset, index) => {
+        const ctx = assetCtxs[index];
+        if (!ctx) return null;
+
+        const currentPrice = parseFloat(ctx.markPx);
+        const prevDayPrice = parseFloat(ctx.prevDayPx);
+        const priceChange = currentPrice - prevDayPrice;
+        const priceChangePercent = prevDayPrice > 0 ? (priceChange / prevDayPrice) * 100 : 0;
+
+        return {
+          symbol: asset.name,
+          price: ctx.markPx,
+          formattedPrice: formatPrice(ctx.markPx),
+          priceChange24h: priceChange,
+          priceChangePercentage24h: formatPercentage(priceChangePercent),
+          isHype: asset.name === "HYPE",
+          isBtc: asset.name === "BTC",
+          isSol: asset.name === "SOL",
+        };
+      })
+      .filter((item): item is PriceItem => item !== null)
       .filter((item) => item.isBtc || item.isHype || item.isSol)
       .sort((a, b) => {
         // Order: BTC, SOL, HYPE
@@ -99,6 +138,17 @@ export default function CheckPrices() {
         maximumFractionDigits: 8,
       }).format(num);
     }
+  }
+
+  function formatPercentage(percentage: number): string {
+    const sign = percentage >= 0 ? "+" : "";
+    return `${sign}${percentage.toFixed(2)}%`;
+  }
+
+  function getPercentageColor(percentage: number): Color {
+    if (percentage > 0) return Color.Green;
+    if (percentage < 0) return Color.Red;
+    return Color.SecondaryText;
   }
 
   function getIcon(symbol: string): Icon {
@@ -155,6 +205,14 @@ export default function CheckPrices() {
             }}
             accessories={[
               {
+                text: item.priceChangePercentage24h,
+                tooltip: `24h Change: ${item.priceChangePercentage24h}`,
+                icon: {
+                  source: item.priceChange24h >= 0 ? Icon.ArrowUpCircle : Icon.ArrowDownCircle,
+                  tintColor: getPercentageColor(item.priceChange24h),
+                },
+              },
+              {
                 text: item.isBtc ? "BTC-PERP" : item.isHype ? "HYPE-PERP" : item.isSol ? "SOL-PERP" : "",
                 tooltip: item.isBtc
                   ? "Bitcoin Perpetual"
@@ -176,6 +234,11 @@ export default function CheckPrices() {
                   title="Copy Formatted Price"
                   content={`$${item.formattedPrice}`}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
+                <Action.CopyToClipboard
+                  title="Copy 24h Change"
+                  content={item.priceChangePercentage24h}
+                  shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
                 />
                 <Action.OpenInBrowser
                   title="View on Hyperliquid"
@@ -216,11 +279,25 @@ export default function CheckPrices() {
                   source: Icon.Circle,
                   tintColor: Color.SecondaryText,
                 }}
+                accessories={[
+                  {
+                    text: item.priceChangePercentage24h,
+                    tooltip: `24h Change: ${item.priceChangePercentage24h}`,
+                    icon: {
+                      source: item.priceChange24h >= 0 ? Icon.ArrowUpCircle : Icon.ArrowDownCircle,
+                      tintColor: getPercentageColor(item.priceChange24h),
+                    },
+                  },
+                ]}
                 actions={
                   <ActionPanel>
                     <Action.CopyToClipboard
                       title="Copy Price"
                       content={item.price}
+                    />
+                    <Action.CopyToClipboard
+                      title="Copy 24h Change"
+                      content={item.priceChangePercentage24h}
                     />
                     <Action.OpenInBrowser
                       title="View on Hyperliquid"
